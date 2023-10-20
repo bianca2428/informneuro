@@ -20,7 +20,7 @@ hv %>%
     filter(results_posted) %>%
     select(nctid, version_date)
 
-hv %>%
+reporting <- hv %>%
     filter(results_posted) %>%
     group_by(nctid) %>%
     slice_head() %>%
@@ -34,3 +34,13 @@ hv %>%
 
 ## use ggplot to make an histogram of the number of days it takes for
 ## trials that do post results
+
+## Some example code
+
+hv_ncts <- hv %>%
+    select(nctid)
+
+hv
+
+reporting %>%
+    write_csv("reporting.csv")
