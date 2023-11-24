@@ -1,6 +1,7 @@
 library(tidyverse)
 library(ggplot2)
 library(cthist) ## https://github.com/bgcarlisle/cthist
+library(jsonlite)
 
 extractions <- read_csv("ctg-studies.csv") %>%
     rename(nctid = "NCT Number") %>%
@@ -44,3 +45,24 @@ hv
 
 reporting %>%
     write_csv("reporting.csv")
+
+## References
+
+hv <- read_csv("historical_versions.csv")
+
+refshv <- hv %>%
+    group_by(nctid) %>%
+    slice_tail() %>%
+    ungroup() %>%
+    filter(references != "[]") %>%
+    select(nctid, references)
+
+for (nctid in refshv$nctid) {
+    refs <- refshv %>%
+        filter(nctid == nctid) %>%
+        pull(references)
+    
+    fromJSON(refs) %>%
+        as_tibble()
+    
+}
