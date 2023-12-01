@@ -10,7 +10,11 @@ trials <- read_csv("ctg-studies.csv") %>%
 ## install_github("bgcarlisle/cthist")
 
 ## Download the historical versions
-clinicaltrials_gov_download(trials$nctid, "hv.csv", latest=TRUE)
+if (! file.exists("hv.csv")) {
+    clinicaltrials_gov_download(trials$nctid, "hv.csv", latest=TRUE)
+} else {
+    message("Whoa there partner! The file hv.csv already exists! (Delete or rename it if you want to re-download)")
+}
 
 hv <- read_csv("hv.csv") %>%
     filter(references != "[]") %>%
@@ -42,11 +46,15 @@ extract_first_results_pmid <- function (jsontxt) {
 hv$ctg_pmid <- sapply(hv$references, extract_first_results_pmid)
 
 ## Keep only rows where PMID's were found and write to disk
-hv %>%
-    filter(! is.na(ctg_pmid)) %>%
-    select(nctid, ctg_pmid) %>%
-    mutate(manually_checked = NA) %>%
-    write_csv("clinicaltrials_gov_pmids.csv")
-
+if (! file.exists("clinicaltrials_gov_pmids.csv")) {
+    hv %>%
+        filter(! is.na(ctg_pmid)) %>%
+        select(nctid, ctg_pmid) %>%
+        mutate(ctg_pmid_link = paste0("https://pubmed.ncbi.nlm.nih.gov/", ctg_pmid, "/")) %>%
+        mutate(manually_checked = NA) %>%
+        write_csv("clinicaltrials_gov_pmids.csv")    
+} else {
+    message("Whoa there partner! The file clinicaltrials_gov_pmids.csv already exists! (Delete or rename it if you want to write the PMID's to disk)")
+}
 ## THESE NEED TO BE CHECKED MANUALLY THAT THE PUBLICATION AT THE PMID
 ## IS THE FINAL RESULTS PUBLICATION FOR THE INDICATED NCT NUMBER
