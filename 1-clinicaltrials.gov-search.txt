@@ -1,0 +1,25 @@
+AREA[Phase] EXPAND[Term] COVER[FullMatch] ("Phase 1" OR "Phase 2" OR "Phase 3")
+
+AND
+
+AREA[EnrollmentType] ("Actual" OR "Anticipated") AND AREA[EnrollmentCount] EXPAND[Term] RANGE[1, MAX]
+
+AND
+
+(AREA[ConditionMeshTerm] COVER[Contains] ("Central Nervous System Diseases") OR AREA[Condition] EXPAND[Concept] ("Neurological") OR AREA[Condition] EXPAND[Concept] ("Alzheimer") OR AREA[Condition] EXPAND[Concept] ("Parkinson") OR AREA[Condition] EXPAND[Concept] ("Amyotrophic lateral sclerosis") OR AREA[Condition] EXPAND[Concept] ("Bell's palsy") OR AREA[Condition] EXPAND[Concept] ("Huntington"))
+
+AND
+
+AREA[StudyType] EXPAND[Term] COVER[FullMatch] ("Interventional")
+
+AND
+
+AREA[OverallStatus] EXPAND[Term] COVER[FullMatch]("Completed" OR "Terminated")
+
+AND
+
+AREA[LocationSearch] EXPAND[Concept] ("USA" OR "US" OR "United States" OR "Canada")
+
+AND 
+
+AREA[StartDate] EXPAND[Term] RANGE[01/01/2011, 12/31/2020]

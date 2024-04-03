@@ -5,27 +5,27 @@ library(cthist)
                                         # ClinicalTrials.gov scraping
 
 ## Read NCT's into memory
-trials <- read_csv("2023-12-13-ex-trials.csv")
+trials <- read_csv("data/neuro-sample.csv")
 
 ## Download latest version of each trial
-if (! file.exists("2023-12-13-hv.csv")){
-    clinicaltrials_gov_download(trials$nctid, "2023-12-13-hv.csv", latest=TRUE)
+if (! file.exists("data/latest.csv")){
+    clinicaltrials_gov_download(trials$nctid, "data/latest.csv", latest=TRUE)
 }
 
 ## Read in latest version of trial records
-hv <- read_csv("2023-12-13-hv.csv")
+hv <- read_csv("data/latest.csv")
 
 ## Extract results publications and write to disk
-if (! file.exists("2023-12-13-clinicaltrials_gov_found_pmids.csv")) {
+if (! file.exists("data/clinicaltrials_gov_found_pmids.csv")) {
     hv %>%
         extract_publications(types="RESULT") %>%
         select(nctid, pmid, citation) %>%
-        write_csv("2023-12-13-clinicaltrials_gov_found_pmids.csv")    
+        write_csv("data/clinicaltrials_gov_found_pmids.csv")
 }
 
 ## In this step, I painstakingly reviewed every single one and wrote it to a new
 ## CSV file, which I read in here!
-ctg_man <- read_csv("2023-12-13-clinicaltrials_gov_found_pmids_manual.csv") %>%
+ctg_man <- read_csv("data/clinicaltrials_gov_found_pmids_manual.csv") %>%
     filter(include) %>%
     select(nctid, pmid)
 
@@ -42,19 +42,19 @@ trials_to_check_in_pubmed <- trials %>%
 
 library(pubmedtk)
 
-ak <- readLines("/home/researchfairy/Academic/2023-12-06-pubmedtk-intersection/api_key.txt")
+ak <- readLines("data/pubmed_api_key.txt")
 
 ## Query Pubmed API
 trials_pubmed_res <- get_pmids_from_searches(trials_to_check_in_pubmed, "nctid", ak)
 
-if (! file.exists("2023-12-13-pubmed-res.csv")) {
+if (! file.exists("data/pubmed-res.csv")) {
     trials_pubmed_res %>%
         filter(n_results > 0) %>%
         select(nctid, pmids) %>%
-        write_csv("2023-12-13-pubmed-res.csv")    
+        write_csv("data/pubmed-res.csv")    
 }
 
-pubmed_man <- read_csv("2023-12-13-pubmed-res_manual.csv") %>%
+pubmed_man <- read_csv("data/pubmed-res_manual.csv") %>%
     filter(include) %>%
     select(nctid, pmid)
 
@@ -64,9 +64,9 @@ found_in_ctg_or_pubmed <- ctg_man %>%
 trials_to_check_in_gsch_em <- trials %>%
     filter(! nctid %in% found_in_ctg_or_pubmed$nctid)
 
-if (! file.exists("2023-12-13-gsch_em_check.csv")) {
+if (! file.exists("data/gsch_em_check.csv")) {
     trials_to_check_in_gsch_em %>%
-        write_csv("2023-12-13-gsch_em_check.csv")
+        write_csv("data/gsch_em_check.csv")
 }
 
                                         # Step 3
@@ -79,7 +79,7 @@ found_with_mdata <- found_in_ctg_or_pubmed %>%
                                         # Step 4
                                         # Combine with Google/Embase manual searches
 
-gsch_em_man <- read_csv("2023-12-13-gsch_check_em_manual.csv") %>%
+gsch_em_man <- read_csv("data/gsch_check_em_manual.csv") %>%
     filter(include) %>%
     select(nctid, doi)
 
@@ -89,7 +89,7 @@ gsch_em_man <- read_csv("2023-12-13-gsch_check_em_manual.csv") %>%
 all_found <- found_with_mdata %>%
     bind_rows(gsch_em_man)
 
-if (! file.exists("all-found.csv")) {
+if (! file.exists("data/all-pubs-found.csv")) {
     all_found %>%
-        write_csv("all-found.csv")
+        write_csv("data/all-pubs-found.csv")
 }

@@ -2,9 +2,8 @@ library(tidyverse)
 library(ggplot2)
 library(cthist) ## https://github.com/bgcarlisle/cthist
 
-extractions <- read_csv("ctg-studies.csv") %>%
-    rename(nctid = "NCT Number") %>%
-    head(n=25)
+extractions <- read_csv("data/neuro-sample.csv") %>%
+    rename(nctid = "NCT Number")
 
 ## Check that the NCT's are unique
 duplicated(extractions$nctid) %>%
@@ -16,7 +15,7 @@ nctids <- extractions %>%
     select(nctid) %>%
     pull()
 
-clinicaltrials_gov_download(nctids, "historical_versions.csv")
+clinicaltrials_gov_download(nctids, "historical_versions-neuro.csv")
 
 ## Once all the historical versions have been successfully downloaded,
 ## this will produce historical_versions.csv, which I copied to the data/
